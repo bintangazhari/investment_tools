@@ -38,8 +38,8 @@ def sellprice_antam():
         price.append((_text[i].text))
 
   antam_table = pd.DataFrame(list(zip(size, price)),
-                columns =['Size (gr)', 'Price'])
-  antam_table['Size (gr)'] = pd.to_numeric(antam_table['Size (gr)'].str.replace(' gr',''))
+                columns =['Amount', 'Price'])
+  antam_table['Amount'] = pd.to_numeric(antam_table['Amount'].str.replace(' gr',''))
   antam_table['Price'] = pd.to_numeric(antam_table['Price'].str.replace(',',''), downcast = 'integer')
   antam_table['Source'] = "Antam"
   antam_table['date'] = date.today()
@@ -55,7 +55,7 @@ def buyback_antam():
 
 def price_antam():
   antam_table = sellprice_antam()
-  antam_table['Buyback'] = pd.to_numeric(buyback_antam()*antam_table['Size (gr)'], downcast = 'integer')
+  antam_table['Buyback'] = pd.to_numeric(buyback_antam()*antam_table['Amount'], downcast = 'integer')
   return antam_table
 
 
@@ -73,8 +73,8 @@ def sellprice_lotus():
     size.append(_size.split()[0])
     price.append(_price)
   lotus_table = pd.DataFrame(list(zip(size, price)),
-                columns =['Size (gr)', 'Price'])
-  lotus_table['Size (gr)'] = pd.to_numeric(lotus_table['Size (gr)'])
+                columns =['Amount', 'Price'])
+  lotus_table['Amount'] = pd.to_numeric(lotus_table['Amount'])
   lotus_table['Price'] = pd.to_numeric(lotus_table['Price'].str.replace(',',''), downcast = 'integer')
   lotus_table['Source'] = "Lotus Archi"
   lotus_table['date'] = date.today()
@@ -92,7 +92,25 @@ def buyback_lotus():
 
 def price_lotus():
   lotus_table = sellprice_lotus()
-  lotus_table['Buyback'] = pd.to_numeric(buyback_lotus()*lotus_table['Size (gr)'], downcast = 'integer')
+  lotus_table['Buyback'] = pd.to_numeric(buyback_lotus()*lotus_table['Amount'], downcast = 'integer')
   return lotus_table
 
+def usd_to_idr():
+  driver = web_driver()
+  driver.get('https://www.bi.go.id/id/statistik/informasi-kurs/transaksi-bi/default.aspx')
+  _kurs_table = driver.find_element(By.XPATH, '//*[@id="ctl00_PlaceHolderMain_g_6c89d4ad_107f_437d_bd54_8fda17b556bf_ctl00_GridView1"]/table/tbody')
+  _row_table = _kurs_table.find_elements(By.TAG_NAME,"tr")
+  _row_table_info = _row_table[23].find_elements(By.TAG_NAME, "td")
+  sell_price = int(_row_table_info[2].text.replace(",","").replace(".",""))/100
+  buyback_price = int(_row_table_info[3].text.replace(",","").replace(".",""))/100
+  data = {
+      'Amount': [1],
+      'Price': [sell_price],
+      'Source': ["Bank Indonesia"],
+      'date': [date.today()],
+      'Buyback': [buyback_price]
+  }
+  usd_table = pd.DataFrame.from_dict(data)
+  return usd_table
+  
 
