@@ -112,5 +112,30 @@ def usd_to_idr():
   }
   usd_table = pd.DataFrame.from_dict(data)
   return usd_table
-  
+
+def galeri24_price():
+  size = []
+  sellprice = []
+  buyback = []
+  driver = web_driver()
+  driver.get('https://galeri24.co.id/harga-emas')
+  _gold_table = driver.find_element(By.XPATH, '//*[@id="GALERI 24"]')
+  _row_table = _gold_table.find_elements(By.XPATH,'//*[@id="GALERI 24"]/div/div[3]/div/div')
+  for i in range(len(_row_table)):
+    if i > 0:
+      _size = _row_table[i].find_element(By.CLASS_NAME,"p-3.col-span-1.whitespace-nowrap.w-fit").text
+      _price = _row_table[i].find_elements(By.CLASS_NAME,"p-3.col-span-2.whitespace-nowrap.w-fit")
+      _sellprice = int(_price[0].text.replace("Rp","").replace(".",""))
+      _buyback = int(_price[1].text.replace("Rp","").replace(".",""))
+      size.append(_size)
+      sellprice.append(_sellprice)
+      buyback.append(_buyback)
+  galeri24_table = pd.DataFrame(list(zip(size, sellprice,buyback)),
+                  columns =['Amount', 'Price', 'Buyback'])
+  galeri24_table['date'] = date.today()
+  galeri24_table['Source'] = "Galeri 24"
+  return galeri24_table
+
+
+
 
