@@ -95,23 +95,6 @@ def price_lotus():
   lotus_table['Buyback'] = pd.to_numeric(buyback_lotus()*lotus_table['Amount'], downcast = 'integer')
   return lotus_table
 
-def usd_to_idr():
-  driver = web_driver()
-  driver.get('https://www.bi.go.id/id/statistik/informasi-kurs/transaksi-bi/default.aspx')
-  _kurs_table = driver.find_element(By.XPATH, '//*[@id="ctl00_PlaceHolderMain_g_6c89d4ad_107f_437d_bd54_8fda17b556bf_ctl00_GridView1"]/table/tbody')
-  _row_table = _kurs_table.find_elements(By.TAG_NAME,"tr")
-  _row_table_info = _row_table[23].find_elements(By.TAG_NAME, "td")
-  sell_price = int(_row_table_info[2].text.replace(",","").replace(".",""))/100
-  buyback_price = int(_row_table_info[3].text.replace(",","").replace(".",""))/100
-  data = {
-      'Amount': [1],
-      'Price': [sell_price],
-      'Source': ["Bank Indonesia"],
-      'date': [date.today()],
-      'Buyback': [buyback_price]
-  }
-  usd_table = pd.DataFrame.from_dict(data)
-  return usd_table
 
 def galeri24_price():
   size = []
